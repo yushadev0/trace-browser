@@ -1,14 +1,38 @@
-program Trace;
+﻿program Trace;
 
 uses
   Vcl.Forms,
-  uMain in 'uMain.pas' {Form1};
+  SysUtils,
+  Windows,
+  uCEFApplication,
+  uMain in 'uMain.pas' {MainFrm},
+  uBrowserFrame in 'uBrowserFrame.pas' {TBrowserFrame: TFrame};
+
+// Senin ana formun
 
 {$R *.res}
 
 begin
-  Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  System.IsMultiThread := True;
+
+  GlobalCEFApp := TCefApplication.Create;
+
+  // Güvenlik kum havuzunu kapat (alt süreç çökmelerini engeller)
+  GlobalCEFApp.NoSandbox := True;
+
+  // Dosya yollarını uygulamanın çalıştığı klasöre (ExtractFilePath) çivile
+  GlobalCEFApp.FrameworkDirPath     := ExtractFilePath(ParamStr(0));
+  GlobalCEFApp.ResourcesDirPath     := ExtractFilePath(ParamStr(0));
+  GlobalCEFApp.LocalesDirPath       := ExtractFilePath(ParamStr(0)) + 'locales';
+
+  if GlobalCEFApp.StartMainProcess then
+  begin
+    Application.Initialize;
+    Application.MainFormOnTaskbar := True;
+    Application.CreateForm(TMainFrm, MainFrm);
   Application.Run;
+  end;
+
+  GlobalCEFApp.Free;
+  GlobalCEFApp := nil;
 end.
