@@ -11,11 +11,11 @@ object TBrowserFrame: TTBrowserFrame
     Height = 480
     Align = alClient
     TabOrder = 0
-    ExplicitTop = 306
-    ExplicitWidth = 624
-    ExplicitHeight = 179
   end
   object Chromium1: TChromium
+    OnAddressChange = Chromium1AddressChange
+    OnTitleChange = Chromium1TitleChange
+    OnBeforePopup = Chromium1BeforePopup
     OnAfterCreated = Chromium1AfterCreated
     Left = 576
     Top = 83
