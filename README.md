@@ -113,7 +113,7 @@ CEF4Delphi must be installed separately before building Trace.
 
 Repository:
 
-[CEF4Delphi](https://github.com/salvadordf/CEF4Delphi?utm_source=chatgpt.com)
+[CEF4Delphi](https://github.com/salvadordf/CEF4Delphi)
 
 ---
 
