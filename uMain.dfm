@@ -4,10 +4,10 @@ object MainFrm: TMainFrm
   Caption = 'Trace'
   ClientHeight = 561
   ClientWidth = 936
-  Color = clBtnFace
+  Color = 328965
   CustomTitleBar.Control = TitleBarPanel1
   CustomTitleBar.Enabled = True
-  CustomTitleBar.Height = 38
+  CustomTitleBar.Height = 30
   CustomTitleBar.SystemHeight = False
   CustomTitleBar.ShowCaption = False
   CustomTitleBar.ShowIcon = False
@@ -15,23 +15,23 @@ object MainFrm: TMainFrm
   CustomTitleBar.SystemButtons = False
   CustomTitleBar.BackgroundColor = 328965
   CustomTitleBar.ForegroundColor = 65793
-  CustomTitleBar.InactiveBackgroundColor = 328965
+  CustomTitleBar.InactiveBackgroundColor = 3815994
   CustomTitleBar.InactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonForegroundColor = clWhite
+  CustomTitleBar.ButtonForegroundColor = clCream
   CustomTitleBar.ButtonBackgroundColor = 328965
-  CustomTitleBar.ButtonHoverForegroundColor = clMaroon
-  CustomTitleBar.ButtonHoverBackgroundColor = 1381653
-  CustomTitleBar.ButtonPressedForegroundColor = 65793
-  CustomTitleBar.ButtonPressedBackgroundColor = 1381653
-  CustomTitleBar.ButtonInactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonInactiveBackgroundColor = 1381653
+  CustomTitleBar.ButtonHoverForegroundColor = clCream
+  CustomTitleBar.ButtonHoverBackgroundColor = 3815994
+  CustomTitleBar.ButtonPressedForegroundColor = clCream
+  CustomTitleBar.ButtonPressedBackgroundColor = 328965
+  CustomTitleBar.ButtonInactiveForegroundColor = clCream
+  CustomTitleBar.ButtonInactiveBackgroundColor = 3815994
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   GlassFrame.Enabled = True
-  GlassFrame.Top = 38
+  GlassFrame.Top = 30
   WindowState = wsMaximized
   StyleElements = []
   OnCloseQuery = FormCloseQuery
@@ -40,41 +40,17 @@ object MainFrm: TMainFrm
   OnResize = FormResize
   OnShow = FormShow
   TextHeight = 15
-  object TitleBarPanel1: TTitleBarPanel
-    Left = 0
-    Top = 0
-    Width = 936
-    Height = 37
-    CustomButtons = <>
-    object skTabs: TSkPaintBox
-      AlignWithMargins = True
-      Left = 0
-      Top = 0
-      Width = 786
-      Height = 37
-      Margins.Left = 0
-      Margins.Top = 0
-      Margins.Right = 150
-      Margins.Bottom = 0
-      Align = alClient
-      OnDblClick = skTabsDblClick
-      OnMouseDown = skTabsMouseDown
-      OnDraw = skTabsDraw
-      ExplicitTop = -15
-      ExplicitWidth = 624
-      ExplicitHeight = 50
-    end
-  end
   object Panel1: TPanel
     Left = 0
-    Top = 37
+    Top = 70
     Width = 936
     Height = 40
     Align = alTop
     BevelOuter = bvNone
     Caption = 'Panel1'
     ShowCaption = False
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitTop = 37
     object skNav: TSkPaintBox
       Left = 0
       Top = 0
@@ -83,12 +59,11 @@ object MainFrm: TMainFrm
       Align = alClient
       OnMouseDown = skNavMouseDown
       OnDraw = skNavDraw
-      ExplicitLeft = 32
-      ExplicitTop = 3
+      ExplicitHeight = 35
     end
     object svgGeri: TSkSvg
-      Left = 8
-      Top = 7
+      Left = 11
+      Top = 11
       Width = 24
       Height = 24
       Cursor = crHandPoint
@@ -106,7 +81,7 @@ object MainFrm: TMainFrm
     end
     object svgIleri: TSkSvg
       Left = 48
-      Top = 7
+      Top = 11
       Width = 24
       Height = 24
       Cursor = crHandPoint
@@ -126,7 +101,7 @@ object MainFrm: TMainFrm
     end
     object svgTazele: TSkSvg
       Left = 88
-      Top = 8
+      Top = 12
       Width = 22
       Height = 22
       Cursor = crHandPoint
@@ -162,11 +137,52 @@ object MainFrm: TMainFrm
   end
   object pnlTarayici: TPanel
     Left = 0
-    Top = 77
+    Top = 110
     Width = 936
-    Height = 484
+    Height = 451
     Align = alClient
     BevelOuter = bvNone
+    TabOrder = 1
+    ExplicitTop = 77
+    ExplicitHeight = 484
+  end
+  object Panel2: TPanel
+    Left = 0
+    Top = 30
+    Width = 936
+    Height = 40
+    Margins.Top = 30
+    Align = alTop
+    BevelOuter = bvNone
+    Caption = 'Panel2'
+    ShowCaption = False
     TabOrder = 2
+    ExplicitTop = 0
+    ExplicitWidth = 954
+    object skTabs: TSkAnimatedPaintBox
+      Left = 0
+      Top = 0
+      Width = 936
+      Height = 40
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alClient
+      OnMouseDown = skTabsMouseDown
+      OnMouseLeave = skTabsMouseLeave
+      OnMouseMove = skTabsMouseMove
+      OnMouseUp = skTabsMouseUp
+      OnAnimationDraw = skTabsAnimationDraw
+      ExplicitTop = -3
+    end
+  end
+  object TitleBarPanel1: TTitleBarPanel
+    Left = 0
+    Top = 0
+    Width = 936
+    Height = 30
+    CustomButtons = <>
+    ExplicitWidth = 930
   end
 end

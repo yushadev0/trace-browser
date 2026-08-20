@@ -13,6 +13,7 @@ object TBrowserFrame: TTBrowserFrame
     TabOrder = 0
   end
   object Chromium1: TChromium
+    OnLoadingStateChange = Chromium1LoadingStateChange
     OnAddressChange = Chromium1AddressChange
     OnTitleChange = Chromium1TitleChange
     OnBeforePopup = Chromium1BeforePopup
