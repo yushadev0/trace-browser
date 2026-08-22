@@ -6,7 +6,8 @@ uses
   Windows,
   uCEFApplication,
   uMain in 'uMain.pas' {MainFrm},
-  uBrowserFrame in 'uBrowserFrame.pas' {TBrowserFrame: TFrame};
+  uBrowserFrame in 'uBrowserFrame.pas' {TBrowserFrame: TFrame},
+  uData in 'uData.pas' {dmVeri: TDataModule};
 
 // Senin ana formun
 
@@ -30,6 +31,7 @@ begin
     Application.Initialize;
     Application.MainFormOnTaskbar := True;
     Application.CreateForm(TMainFrm, MainFrm);
+  Application.CreateForm(TdmVeri, dmVeri);
   Application.Run;
   end;
 

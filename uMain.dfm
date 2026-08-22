@@ -42,7 +42,7 @@ object MainFrm: TMainFrm
   TextHeight = 15
   object Panel1: TPanel
     Left = 0
-    Top = 70
+    Top = 69
     Width = 936
     Height = 40
     Align = alTop
@@ -50,7 +50,6 @@ object MainFrm: TMainFrm
     Caption = 'Panel1'
     ShowCaption = False
     TabOrder = 0
-    ExplicitTop = 37
     object skNav: TSkPaintBox
       Left = 0
       Top = 0
@@ -132,23 +131,25 @@ object MainFrm: TMainFrm
       ParentFont = False
       TabOrder = 0
       Text = 'edtURL'
+      OnChange = edtURLChange
+      OnEnter = edtURLEnter
+      OnExit = edtURLExit
+      OnKeyDown = edtURLKeyDown
       OnKeyPress = edtURLKeyPress
     end
   end
   object pnlTarayici: TPanel
     Left = 0
-    Top = 110
+    Top = 109
     Width = 936
-    Height = 451
+    Height = 452
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 77
-    ExplicitHeight = 484
   end
   object Panel2: TPanel
     Left = 0
-    Top = 30
+    Top = 29
     Width = 936
     Height = 40
     Margins.Top = 30
@@ -157,8 +158,6 @@ object MainFrm: TMainFrm
     Caption = 'Panel2'
     ShowCaption = False
     TabOrder = 2
-    ExplicitTop = 0
-    ExplicitWidth = 954
     object skTabs: TSkAnimatedPaintBox
       Left = 0
       Top = 0
@@ -174,15 +173,41 @@ object MainFrm: TMainFrm
       OnMouseMove = skTabsMouseMove
       OnMouseUp = skTabsMouseUp
       OnAnimationDraw = skTabsAnimationDraw
-      ExplicitTop = -3
     end
   end
   object TitleBarPanel1: TTitleBarPanel
     Left = 0
     Top = 0
     Width = 936
-    Height = 30
+    Height = 29
     CustomButtons = <>
-    ExplicitWidth = 930
+  end
+  object lstOneriler: TListBox
+    Left = 520
+    Top = 248
+    Width = 121
+    Height = 97
+    Style = lbOwnerDrawFixed
+    BorderStyle = bsNone
+    Color = 2367776
+    ItemHeight = 46
+    TabOrder = 4
+    Visible = False
+    OnClick = lstOnerilerClick
+    OnDrawItem = lstOnerilerDrawItem
+  end
+  object tmrArama: TTimer
+    Enabled = False
+    Interval = 250
+    OnTimer = tmrAramaTimer
+    Left = 872
+    Top = 125
+  end
+  object tmrOdak: TTimer
+    Enabled = False
+    Interval = 50
+    OnTimer = tmrOdakTimer
+    Left = 872
+    Top = 181
   end
 end

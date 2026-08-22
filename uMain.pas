@@ -24,11 +24,12 @@ type
     Panel2: TPanel;
     skTabs: TSkAnimatedPaintBox;
     TitleBarPanel1: TTitleBarPanel;
-    procedure Button1Click(Sender: TObject);
+    tmrArama: TTimer;
+    lstOneriler: TListBox;
+    tmrOdak: TTimer;
     procedure edtURLKeyPress(Sender: TObject; var Key: Char);
     procedure YeniSekmeAc(const URL: string);
     procedure FormShow(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure btnBackClick(Sender: TObject);
     procedure btnForwardClick(Sender: TObject);
@@ -53,10 +54,19 @@ type
     procedure skTabsMouseLeave(Sender: TObject);
     procedure skTabsAnimationDraw(ASender: TObject; const ACanvas: ISkCanvas;
       const ADest: TRectF; const AProgress: Double; const AOpacity: Single);
+    procedure edtURLChange(Sender: TObject);
+    procedure edtURLEnter(Sender: TObject);
+    procedure tmrAramaTimer(Sender: TObject);
+    procedure lstOnerilerDrawItem(Control: TWinControl; Index: Integer;
+      Rect: TRect; State: TOwnerDrawState);
+    procedure lstOnerilerClick(Sender: TObject);
+    procedure edtURLKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure edtURLExit(Sender: TObject);
+    procedure tmrOdakTimer(Sender: TObject);
   private
     FSekmeKutulari: TArray<TRectF>;
     FSekmeler: TList<TTBrowserFrame>;
-    FAktifIndex: Integer;
+
     FSekmeSayaci: Integer;
     FArtiButonuKutusu: TRectF;
     FSurukleniyor: Boolean;
@@ -64,8 +74,13 @@ type
     FSuruklemeFarki: Single;
 
     procedure AktifSekmeyiGoster;
+
   public
+    FAdresiKodDegistiriyor: Boolean;
+    FAktifIndex: Integer;
+
     function AktifKapsul: TTBrowserFrame;
+    procedure SekmeyiKapat(SekmeIndex: Integer);
   end;
 
 var
@@ -74,6 +89,8 @@ var
 implementation
 
 {$R *.dfm}
+
+uses uData;
 
 function TMainFrm.AktifKapsul: TTBrowserFrame;
 begin
@@ -129,9 +146,91 @@ begin
   AktifKapsul.Chromium1.Reload;
 end;
 
-procedure TMainFrm.Button1Click(Sender: TObject);
+procedure TMainFrm.edtURLChange(Sender: TObject);
 begin
-  ShowMessage('merhaba dünya');
+  if FAdresiKodDegistiriyor then
+    Exit; // SİHİRLİ KİLİT BURADA!
+
+  tmrArama.Enabled := False;
+
+  if Trim(edtURL.Text) = '' then
+  begin
+    Exit;
+  end;
+
+  tmrArama.Enabled := True;
+end;
+
+procedure TMainFrm.edtURLEnter(Sender: TObject);
+begin
+  if Trim(edtURL.Text) <> '' then
+    tmrArama.Enabled := True;
+end;
+
+procedure TMainFrm.edtURLExit(Sender: TObject);
+var
+  FareNoktasi: TPoint;
+begin
+  if lstOneriler.Visible then
+  begin
+    // Farenin ekrandaki konumunu formumuzun iç koordinatlarına çeviriyoruz
+    FareNoktasi := ScreenToClient(Mouse.CursorPos);
+
+    // Eğer fare o an ListBox'ın sınırları içinde DEĞİLSE gizle!
+    if not lstOneriler.BoundsRect.Contains(FareNoktasi) then
+      lstOneriler.Visible := False;
+  end;
+end;
+
+procedure TMainFrm.edtURLKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  SecilenMetin, YeniURL: string;
+  TirePos: Integer;
+begin
+  // Eğer liste görünmüyorsa ok tuşlarına karışma
+  if not lstOneriler.Visible then
+    Exit;
+  if lstOneriler.Items.Count = 0 then
+    Exit;
+
+  // AŞAĞI veya YUKARI tuşuna basıldıysa
+  if (Key = VK_DOWN) or (Key = VK_UP) then
+  begin
+    // 1. Yeni Satırı Seç
+    if Key = VK_DOWN then
+    begin
+      if lstOneriler.ItemIndex < lstOneriler.Items.Count - 1 then
+        lstOneriler.ItemIndex := lstOneriler.ItemIndex + 1
+      else
+        lstOneriler.ItemIndex := 0; // Sona geldiyse başa dön
+    end
+    else if Key = VK_UP then
+    begin
+      if lstOneriler.ItemIndex > 0 then
+        lstOneriler.ItemIndex := lstOneriler.ItemIndex - 1
+      else
+        lstOneriler.ItemIndex := lstOneriler.Items.Count - 1;
+      // Baştaysa sona dön
+    end;
+
+    Key := 0; // TEdit'in kendi ok tuşu davranışını iptal et (İmleç sağa/sola kaymasın)
+
+    // 2. Seçilen Satırdaki URL'yi Adres Çubuğuna Doldur (Chrome gibi!)
+    SecilenMetin := lstOneriler.Items[lstOneriler.ItemIndex];
+    TirePos := LastDelimiter('-', SecilenMetin);
+
+    if TirePos > 0 then
+      YeniURL := Trim(Copy(SecilenMetin, TirePos + 1, Length(SecilenMetin)))
+    else
+      YeniURL := SecilenMetin;
+
+    // Arama sayacı tetiklenmesin diye kilitliyoruz
+    FAdresiKodDegistiriyor := True;
+    edtURL.Text := YeniURL;
+    edtURL.SelStart := Length(edtURL.Text); // İmleci yazının en sonuna al
+    FAdresiKodDegistiriyor := False;
+  end;
 end;
 
 procedure TMainFrm.edtURLKeyPress(Sender: TObject; var Key: Char);
@@ -140,15 +239,33 @@ var
 begin
   if Key = #13 then
   begin
-    Key := #0;
+    Key := #0; // Sesi (ding) engelle
+    tmrArama.Enabled := False; // Sayacı iptal et
+
+    // YENİ: Eğer liste açıksa ve bir satır seçilmişse (ok tuşlarıyla)
+    if lstOneriler.Visible and (lstOneriler.ItemIndex <> -1) then
+    begin
+      // ListBox'ın kendi tıklama olayını tetikle ve çık!
+      lstOnerilerClick(nil);
+      Exit;
+    end;
+
+    lstOneriler.Visible := False;
     TargetURL := Trim(edtURL.Text);
 
-    if (Pos(' ', TargetURL) = 0) and (Pos('.', TargetURL) > 0) then
+    // 1. YENİ KALKAN: Eğer yazılan şey bizim özel trace:// komutumuzsa, ona hiç dokunma!
+    if Pos('trace://', TargetURL) = 1 then
+    begin
+      // Olduğu gibi bırak, aşağıda doğrudan Chromium'a gidecek
+    end
+    // 2. Normal site mi? (İçinde boşluk yok ve nokta var)
+    else if (Pos(' ', TargetURL) = 0) and (Pos('.', TargetURL) > 0) then
     begin
       if (Pos('http://', TargetURL) = 0) and (Pos('https://', TargetURL) = 0)
       then
         TargetURL := 'https://' + TargetURL;
     end
+    // 3. Hiçbirine uymuyorsa Google'da ara!
     else
     begin
       TargetURL := 'https://www.google.com/search?q=' +
@@ -196,7 +313,80 @@ end;
 
 procedure TMainFrm.FormShow(Sender: TObject);
 begin
-  YeniSekmeAc('https://google.com');
+  YeniSekmeAc('trace://newtab');
+end;
+
+procedure TMainFrm.lstOnerilerClick(Sender: TObject);
+var
+  TamMetin, HedefURL: string;
+  TirePos: Integer;
+begin
+  if lstOneriler.ItemIndex = -1 then
+    Exit;
+
+  TamMetin := lstOneriler.Items[lstOneriler.ItemIndex];
+  TirePos := LastDelimiter('-', TamMetin);
+
+  if TirePos > 0 then
+  begin
+    HedefURL := Trim(Copy(TamMetin, TirePos + 1, Length(TamMetin)));
+
+    // Kodla değiştiği için bayrağı kullanıyoruz ki sonsuz döngü olmasın
+    FAdresiKodDegistiriyor := True;
+    edtURL.Text := HedefURL;
+    FAdresiKodDegistiriyor := False;
+
+    lstOneriler.Visible := False; // İşimiz bitti, gizle
+
+    if AktifKapsul <> nil then
+      AktifKapsul.Chromium1.LoadURL(HedefURL);
+  end;
+end;
+
+procedure TMainFrm.lstOnerilerDrawItem(Control: TWinControl; Index: Integer;
+  Rect: TRect; State: TOwnerDrawState);
+var
+  TamMetin, Baslik, URL: string;
+  TirePos: Integer;
+  Tuval: TCanvas;
+begin
+  Tuval := (Control as TListBox).Canvas;
+  TamMetin := (Control as TListBox).Items[Index];
+
+  // Metni Başlık ve URL olarak ikiye bölüyoruz
+  TirePos := LastDelimiter('-', TamMetin);
+  if TirePos > 0 then
+  begin
+    Baslik := Trim(Copy(TamMetin, 1, TirePos - 1));
+    URL := Trim(Copy(TamMetin, TirePos + 1, Length(TamMetin)));
+  end
+  else
+    Baslik := TamMetin;
+
+  // 1. ARKA PLAN BOYANMASI (Üzerine gelince renk değişimi)
+  if odSelected in State then
+    Tuval.Brush.Color := $00343130 // Hover (Üzerine gelince) Açık Gri
+  else
+    Tuval.Brush.Color := $00242120; // Normal Koyu Gri
+
+  Tuval.FillRect(Rect);
+
+  // 2. İKON ÇİZİMİ
+  Tuval.Font.Name := 'Segoe UI Emoji';
+  Tuval.Font.Size := 12;
+  Tuval.Font.Color := $00EDEAE8;
+  Tuval.TextOut(Rect.Left + 10, Rect.Top + 12, '🕒');
+
+  // 3. BAŞLIK ÇİZİMİ
+  Tuval.Font.Name := 'Segoe UI';
+  Tuval.Font.Size := 11;
+  Tuval.Font.Color := $00EDEAE8; // Beyazımsı Gri
+  Tuval.TextOut(Rect.Left + 40, Rect.Top + 4, Baslik);
+
+  // 4. URL ÇİZİMİ
+  Tuval.Font.Size := 9;
+  Tuval.Font.Color := $00F8B48A; // BGR formatında Mavi
+  Tuval.TextOut(Rect.Left + 40, Rect.Top + 24, URL);
 end;
 
 procedure TMainFrm.skNavDraw(ASender: TObject; const ACanvas: ISkCanvas;
@@ -221,6 +411,7 @@ procedure TMainFrm.skNavMouseDown(Sender: TObject; Button: TMouseButton;
 var
   Olcek, SkiaX, SkiaY: Single;
 begin
+
   Olcek := skNav.ScaleFactor;
   SkiaX := X / Olcek;
   SkiaY := Y / Olcek;
@@ -443,6 +634,7 @@ var
   i: Integer;
   SekmeyeTiklandi: Boolean; // Yeni takip değişkeni
 begin
+  lstOneriler.Visible := False;
   if Button <> mbLeft then
     Exit;
 
@@ -452,7 +644,7 @@ begin
   // 2. ARTI BUTONU
   if FArtiButonuKutusu.Contains(PointF(SkiaX, SkiaY)) then
   begin
-    YeniSekmeAc('https://google.com');
+    YeniSekmeAc('trace://newtab');
     Exit;
   end;
 
@@ -466,34 +658,7 @@ begin
 
       if SkiaX > (FSekmeKutulari[i].Right - 30) then
       begin
-        // ÇARPIYA BASILDI (Hemen silme, aşağı düşme emri ver)
-        FSekmeler[i].KapanisAsamasinda := True;
-        FSekmeler[i].HedefY := skTabs.Height + 20; // Tuvalin altına hedef koy
-
-        // Eğer kapanan aktif sekme ise, anında başka bir sekmeyi aktif yap
-        if FAktifIndex = i then
-        begin
-          var
-          YeniAktif := -1;
-          for var j := i - 1 downto 0 do
-            if not FSekmeler[j].KapanisAsamasinda then
-            begin
-              YeniAktif := j;
-              Break;
-            end;
-          if YeniAktif = -1 then
-            for var j := i + 1 to FSekmeler.Count - 1 do
-              if not FSekmeler[j].KapanisAsamasinda then
-              begin
-                YeniAktif := j;
-                Break;
-              end;
-
-          FAktifIndex := YeniAktif;
-          AktifSekmeyiGoster;
-          if AktifKapsul <> nil then
-            edtURL.Text := AktifKapsul.GuncelURL;
-        end;
+        SekmeyiKapat(i);
         Break;
       end
       else
@@ -502,7 +667,11 @@ begin
         FAktifIndex := i;
         AktifSekmeyiGoster;
         if AktifKapsul <> nil then
+        begin
+          FAdresiKodDegistiriyor := True;
           edtURL.Text := AktifKapsul.GuncelURL;
+          FAdresiKodDegistiriyor := False;
+        end;
 
         FSuruklenenIndex := i;
         FSurukleniyor := True;
@@ -579,27 +748,139 @@ begin
     FSurukleniyor := False;
 end;
 
-procedure TMainFrm.SpeedButton1Click(Sender: TObject);
-begin
-  YeniSekmeAc('https://google.com');
-end;
-
 procedure TMainFrm.svgGeriClick(Sender: TObject);
 begin
+  lstOneriler.Visible := False;
   if (AktifKapsul <> nil) and AktifKapsul.Chromium1.CanGoBack then
     AktifKapsul.Chromium1.GoBack;
 end;
 
 procedure TMainFrm.svgIleriClick(Sender: TObject);
 begin
+  lstOneriler.Visible := False;
   if (AktifKapsul <> nil) and AktifKapsul.Chromium1.CanGoForward then
     AktifKapsul.Chromium1.GoForward;
 end;
 
 procedure TMainFrm.svgTazeleClick(Sender: TObject);
 begin
+  lstOneriler.Visible := False;
   if (AktifKapsul <> nil) then
     AktifKapsul.Chromium1.Reload;
+end;
+
+procedure TMainFrm.tmrAramaTimer(Sender: TObject);
+var
+  OneriListesi: TStringList;
+begin
+  tmrArama.Enabled := False;
+  if not edtURL.Focused then
+    Exit; // Kullanıcı başka yere tıkladıysa iptal
+
+  OneriListesi := TStringList.Create;
+  try
+    if Assigned(dmVeri) then
+      dmVeri.OnerileriGetir(edtURL.Text, OneriListesi);
+
+    if OneriListesi.Count > 0 then
+    begin
+      lstOneriler.Items.Assign(OneriListesi);
+
+      // Boyut ve Konum Ayarları
+      lstOneriler.Height := (lstOneriler.Items.Count * lstOneriler.ItemHeight);
+      lstOneriler.Width := edtURL.Width;
+      lstOneriler.Left := Panel1.Left + edtURL.Left;
+      lstOneriler.Top := Panel1.Top + Panel1.Height;
+
+      lstOneriler.BringToFront;
+      lstOneriler.Visible := True;
+      tmrOdak.Enabled := True;
+    end
+    else
+      lstOneriler.Visible := False;
+  finally
+    OneriListesi.Free;
+  end;
+end;
+
+procedure TMainFrm.tmrOdakTimer(Sender: TObject);
+var
+  GTI: TGUITHREADINFO;
+begin
+  // Eğer liste zaten gizliyse boşuna çalışma
+  if not lstOneriler.Visible then
+  begin
+    tmrOdak.Enabled := False;
+    Exit;
+  end;
+
+  // Windows'tan "Klavye/Fare odağı tam olarak kimin elinde?" bilgisini al
+  GTI.cbSize := SizeOf(TGUITHREADINFO);
+  if GetGUIThreadInfo(0, GTI) then
+  begin
+    // Eğer odak Adres Çubuğunda DEĞİLSE ve ListBox'ın kendisinde DEĞİLSE...
+    // (Yani Chromium'a, sekmelere veya başka bir programa tıklandıysa)
+    if (GTI.hwndFocus <> edtURL.Handle) and (GTI.hwndFocus <> lstOneriler.Handle)
+    then
+    begin
+      lstOneriler.Visible := False; // Acımasızca gizle!
+      tmrOdak.Enabled := False; // Avcıyı uykuya al
+    end;
+  end;
+end;
+
+procedure TMainFrm.SekmeyiKapat(SekmeIndex: Integer);
+begin
+  if (SekmeIndex < 0) or (SekmeIndex >= FSekmeler.Count) then
+    Exit;
+  if FSekmeler[SekmeIndex].KapanisAsamasinda then
+    Exit;
+
+  // ÇARPIYA BASILDI (Hemen silme, aşağı düşme emri ver)
+  FSekmeler[SekmeIndex].KapanisAsamasinda := True;
+  FSekmeler[SekmeIndex].HedefY := skTabs.Height + 20;
+  // Tuvalin altına hedef koy
+
+  // Eğer kapanan aktif sekme ise, anında başka bir sekmeyi aktif yap
+  if FAktifIndex = SekmeIndex then
+  begin
+    var
+    YeniAktif := -1;
+
+    // Önce sola doğru ara
+    for var j := SekmeIndex - 1 downto 0 do
+      if not FSekmeler[j].KapanisAsamasinda then
+      begin
+        YeniAktif := j;
+        Break;
+      end;
+
+    // Bulamazsa sağa doğru ara
+    if YeniAktif = -1 then
+      for var j := SekmeIndex + 1 to FSekmeler.Count - 1 do
+        if not FSekmeler[j].KapanisAsamasinda then
+        begin
+          YeniAktif := j;
+          Break;
+        end;
+
+    FAktifIndex := YeniAktif;
+    AktifSekmeyiGoster;
+
+    if AktifKapsul <> nil then
+    begin
+      FAdresiKodDegistiriyor := True;
+      edtURL.Text := AktifKapsul.GuncelURL;
+      FAdresiKodDegistiriyor := False;
+    end
+    else
+    begin
+      // Eğer son sekme kapandıysa adres çubuğunu temizle
+      FAdresiKodDegistiriyor := True;
+      edtURL.Text := '';
+      FAdresiKodDegistiriyor := False;
+    end;
+  end;
 end;
 
 end.
