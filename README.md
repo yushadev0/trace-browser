@@ -6,6 +6,8 @@ Built with Delphi, CEF4Delphi, Chromium and Skia, Trace focuses on a minimal int
 
 The goal is simple: build a browser around the way I actually use a browser.
 
+**[Download the latest Windows build →](https://github.com/yushadev0/trace-browser/releases/latest)**
+
 ---
 
 ## Screenshots
@@ -182,6 +184,10 @@ Repository:
 ---
 
 ## Installation
+
+### Prebuilt Binaries (Windows)
+
+Don't want to build from source? Download a ready-to-run Windows build from the [Releases page](https://github.com/yushadev0/trace-browser/releases/latest), extract the archive, and run `Trace.exe`.
 
 ### Requirements
 
