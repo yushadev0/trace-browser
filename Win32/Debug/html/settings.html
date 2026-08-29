@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Ayarlar - Trace</title>
+<style>
+:root {
+  --bg:      #202124;
+  --bg2:     #292a2d;
+  --bg3:     #303134;
+  --border:  #3c4043;
+  --text:    #E8EAED;
+  --text2:   #9aa0a6;
+  --accent:  #8AB4F8;
+  --danger:  #f28b82;
+  --success: #81c995;
+  --warn:    #fdd663;
+}
+body.light {
+  --bg:      #FFFFFF;
+  --bg2:     #F1F3F4;
+  --bg3:     #E8EAED;
+  --border:  #dadce0;
+  --text:    #202124;
+  --text2:   #5f6368;
+  --accent:  #1a73e8;
+  --danger:  #d93025;
+  --success: #1e8e3e;
+  --warn:    #e37400;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+/* ── SIDEBAR ── */
+.sidebar{width:236px;min-width:236px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-header{padding:18px 18px 10px;font-size:18px;font-weight:600;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.search-wrap{padding:10px 14px}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:7px 14px;color:var(--text);font-size:12px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(--accent)}
+.nav-group{padding:6px 0}
+.nav-label{padding:5px 18px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:var(--text2);font-size:13px;transition:all .12s;border-radius:0;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{color:var(--accent);background:rgba(138,180,248,.12)}
+body.light .nav-item.active{background:rgba(26,115,232,.1)}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:28px 36px 60px}
+section{max-width:700px;margin-bottom:44px;scroll-margin-top:16px}
+.section-title{font-size:20px;font-weight:500;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.card-row{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;gap:14px}
+.card-row+.card-row{border-top:1px solid var(--border)}
+.card-label{font-size:13px;font-weight:500;color:var(--text)}
+.card-desc{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.card-left{flex:1;min-width:0}
+.card-full{padding:16px 18px}
+.card-full+.card-full{border-top:1px solid var(--border)}
+
+/* ── TOGGLE ── */
+.toggle{position:relative;width:42px;height:23px;min-width:42px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:23px;transition:.2s}
+.toggle input:checked~.toggle-track{background:var(--accent)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;background:#fff;border-radius:50%;transition:.2s;pointer-events:none}
+.toggle input:checked~.toggle-thumb{transform:translateX(19px)}
+
+/* ── INPUTS ── */
+.inp{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;outline:none;transition:border-color .18s;font-family:inherit}
+.inp:focus{border-color:var(--accent)}
+.inp:disabled{opacity:.5;cursor:not-allowed}
+.inp-wide{width:300px}
+.inp-full{width:100%}
+.inp-row{display:flex;gap:8px;align-items:center}
+
+/* ── SELECT ── */
+select.inp{appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%239aa0a6' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-family:inherit;transition:all .14s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+body.light .btn-primary{color:#fff}
+.btn-primary:hover{opacity:.88}
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{background:var(--bg3)}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.btn-danger:hover{background:rgba(242,139,130,.13)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── RADIO ── */
+.radio-group{display:flex;flex-direction:column;gap:10px}
+.radio-opt{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1px solid var(--border);transition:border-color .15s}
+.radio-opt:hover{border-color:var(--text2)}
+.radio-opt input[type=radio]{accent-color:var(--accent);margin-top:2px;width:15px;height:15px}
+.radio-opt.selected{border-color:var(--accent)}
+
+/* ── THEME CARDS ── */
+.theme-grid{display:flex;gap:10px}
+.theme-card{flex:1;border:2px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:border-color .15s}
+.theme-card:hover{border-color:var(--text2)}
+.theme-card.active{border-color:var(--accent)}
+.theme-preview{width:100%;height:50px;border-radius:6px;margin-bottom:8px}
+.theme-dark-prev{background:linear-gradient(135deg,#202124 50%,#3c4043 50%)}
+.theme-light-prev{background:linear-gradient(135deg,#FFFFFF 50%,#F1F3F4 50%)}
+.theme-name{font-size:12px;font-weight:500}
+
+/* ── AVATAR ── */
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:700;flex-shrink:0}
+
+/* ── DANGER ZONE ── */
+.dz{border:1px solid rgba(242,139,130,.35);border-radius:12px;overflow:hidden}
+.dz-head{background:rgba(242,139,130,.08);padding:11px 18px;font-size:12px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:.5px}
+.dz-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;gap:14px;border-top:1px solid rgba(60,64,67,.4)}
+.dz-row:first-of-type{border-top:none}
+.dz-all{background:rgba(242,139,130,.05)}
+
+/* ── PASSWORDS TABLE ── */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 13px;font-size:11px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)}
+td{padding:11px 13px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+.mock-label{display:inline-block;font-size:10px;font-weight:700;background:#f28b82;color:#fff;padding:1px 6px;border-radius:3px;margin-left:8px;vertical-align:middle}
+
+/* ── BADGE ── */
+.soon{font-size:10px;font-weight:700;background:rgba(253,214,99,.18);color:var(--warn);padding:2px 7px;border-radius:4px;margin-left:8px;vertical-align:middle}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-size:12px;color:var(--text);display:flex;align-items:center;gap:7px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.toast.show{opacity:1}
+
+/* ── API KEY SECTION ── */
+.api-row{display:flex;gap:8px;align-items:stretch}
+.api-row .inp{flex:1;font-family:monospace;font-size:12px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-header">⚙️ Ayarlar</div>
+  <div class="search-wrap">
+    <input type="text" class="search-input" placeholder="Ayarlarda ara..." oninput="searchSections(this.value)">
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Hesap</div>
+    <div class="nav-item active" data-sec="profil" onclick="scrollToSec('profil')"><span class="nav-icon">👤</span>Profil</div>
+    <div class="nav-item" data-sec="ai" onclick="scrollToSec('ai')"><span class="nav-icon">🤖</span>Yapay Zeka</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Tarayıcı</div>
+    <div class="nav-item" data-sec="gorunum" onclick="scrollToSec('gorunum')"><span class="nav-icon">🎨</span>Görünüm</div>
+    <div class="nav-item" data-sec="indirmeler" onclick="scrollToSec('indirmeler')"><span class="nav-icon">⬇️</span>İndirmeler</div>
+    <div class="nav-item" data-sec="baslangic" onclick="scrollToSec('baslangic')"><span class="nav-icon">🚀</span>Başlangıç</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Gizlilik</div>
+    <div class="nav-item" data-sec="veri" onclick="scrollToSec('veri')"><span class="nav-icon">🗑️</span>Veri Yönetimi</div>
+    <div class="nav-item" data-sec="sifreler" onclick="scrollToSec('sifreler')"><span class="nav-icon">🔐</span>Şifreler</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Sistem</div>
+    <div class="nav-item" data-sec="sistem" onclick="scrollToSec('sistem')"><span class="nav-icon">🌐</span>Sistem</div>
+  </div>
+</nav>
+
+<!-- ═══ CONTENT ════════════════════════════════════════════════════════════ -->
+<main class="content" id="content" onscroll="updateNav()">
+
+  <!-- PROFIL ─────────────────────────────────────── -->
+  <section id="profil">
+    <div class="section-title">Profil</div>
+    <div class="card">
+      <div class="card-row">
+        <div class="avatar" id="avatarEl">Y</div>
+        <div class="card-left" style="margin-left:14px">
+          <div class="card-label">Profil Avatarı</div>
+          <div class="card-desc">İsminizin baş harfinden oluşturulur. Yeni sekmede görünür.</div>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">Selamlama Metni</div>
+          <div class="card-desc">Yeni sekmede görünen karşılama kelimesi (ör: Merhaba, Selam)</div>
+        </div>
+        <input type="text" id="inp-sal" class="inp inp-wide" placeholder="Merhaba"
+          onblur="save('greeting_salutation', this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">Adınız</div>
+          <div class="card-desc">Yeni sekmede karşılama mesajında görünür</div>
+        </div>
+        <input type="text" id="inp-name" class="inp inp-wide" placeholder="Yuşa"
+          oninput="updateAvatar(this.value)"
+          onblur="save('greeting_name', this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+    </div>
+  </section>
+
+  <!-- YAPAY ZEKA ──────────────────────────────────── -->
+  <section id="ai">
+    <div class="section-title">Yapay Zeka</div>
+    <div class="card">
+      <div class="card-full">
+        <div class="card-label">Gemini API Anahtarı</div>
+        <div class="card-desc" style="margin-top:4px;margin-bottom:12px">Kendi Google AI Studio anahtarınızı girin. Boş bırakırsanız varsayılan anahtar kullanılır. Anahtar yalnızca bu cihazda saklanır.</div>
+        <div class="api-row" style="margin-bottom:8px">
+          <input type="password" id="inp-apikey" class="inp" placeholder="AIzaSy..."
+            onblur="save('api_key', this.value)"
+            onkeydown="if(event.key==='Enter')this.blur()">
+          <button class="btn btn-secondary" onclick="toggleKey()" id="btnKey">Göster</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="openURL('https://aistudio.google.com/apikey')">🔑 API Anahtarı Al →</button>
+          <button class="btn btn-secondary" onclick="clearApiKey()">↩ Varsayılana Sıfırla</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-full">
+        <div class="card-label">E-posta Servisi (IMAP)</div>
+        <div class="card-desc" style="margin-top:4px">Yapay zekanın okunmamış maillerini özetleyebilmesi için IMAP erişimi gereklidir. Ana şifrenizi değil, "Uygulama Şifresi" (App Password) kullanın.</div>
+      </div>
+      <div class="card-row">
+        <div class="card-left"><div class="card-label">Servis Sağlayıcı</div></div>
+        <select id="inp-email-svc" class="inp" onchange="save('email_service', this.value); updateImapParams(this.value)">
+          <option value="gmail">Gmail</option>
+          <option value="outlook">Outlook</option>
+          <option value="custom">Özel IMAP</option>
+        </select>
+      </div>
+      <div class="card-row">
+        <div class="card-left"><div class="card-label">E-posta Adresi</div></div>
+        <input type="email" id="inp-email-addr" class="inp inp-wide" placeholder="ornek@gmail.com" 
+          onblur="save('email_address', this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div class="card-row">
+        <div class="card-left">
+            <div class="card-label">Uygulama Şifresi</div>
+            <div class="card-desc">Örn: Gmail Hesap Ayarları -> Güvenlik -> Uygulama Şifreleri</div>
+        </div>
+        <div class="api-row" style="width: 300px;">
+          <input type="password" id="inp-email-pass" class="inp" placeholder="xxxx xxxx xxxx xxxx" 
+            onblur="save('email_password', this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+          <button class="btn btn-secondary" onclick="toggleMailKey()" id="btnMailKey">Göster</button>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="card-left"><div class="card-label">IMAP Sunucu:Port</div></div>
+        <input type="text" id="inp-email-imap" class="inp inp-wide" placeholder="imap.gmail.com:993" 
+          onblur="save('email_imap', this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div class="card-row">
+        <button class="btn btn-secondary" id="btnTestImap" onclick="testImapConnection()">🔗 Bağlantıyı Test Et</button>
+      </div>
+      <div class="card-row" id="imapStatusRow">
+        <div class="card-left">
+          <div class="card-label" style="display:flex;align-items:center;gap:8px">
+            <span id="imapStatusDot" style="width:9px;height:9px;border-radius:50%;background:var(--text2);flex-shrink:0"></span>
+            <span>Sistem Durumu: <span id="imapStatusText" style="font-weight:400;color:var(--text2)">Test edilmedi</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GÖRÜNÜM ─────────────────────────────────────── -->
+  <section id="gorunum">
+    <div class="section-title">Görünüm</div>
+    <div class="card">
+      <div class="card-full">
+        <div class="card-label" style="margin-bottom:12px">Tema</div>
+        <div class="theme-grid">
+          <div class="theme-card active" id="tc-dark" onclick="changeTheme('dark')">
+            <div class="theme-preview theme-dark-prev"></div>
+            <div class="theme-name">🌙 Karanlık</div>
+          </div>
+          <div class="theme-card" id="tc-light" onclick="changeTheme('light')">
+            <div class="theme-preview theme-light-prev"></div>
+            <div class="theme-name">☀️ Açık</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">Dil</div>
+          <div class="card-desc">Tarayıcı arayüzü ve AI yanıt dili</div>
+        </div>
+        <select id="inp-lang" class="inp"
+          onchange="save('language', this.value); showToast('✓ Dil değiştirildi. Yeni sekmede görünür.')">
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="en">🇺🇸 English</option>
+          <option value="de">🇩🇪 Deutsch</option>
+          <option value="fr">🇫🇷 Français</option>
+          <option value="es">🇪🇸 Español</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- İNDİRMELER ──────────────────────────────────── -->
+  <section id="indirmeler">
+    <div class="section-title">İndirmeler</div>
+    <div class="card">
+      <div class="card-full">
+        <div class="card-label">İndirme Klasörü</div>
+        <div class="card-desc" style="margin-top:3px;margin-bottom:10px">İndirilen dosyaların kaydedileceği konum</div>
+        <div class="inp-row">
+          <input type="text" id="inp-dl-path" class="inp inp-full" placeholder="C:\Users\...\Downloads"
+            onblur="save('downloads_path', this.value)"
+            onkeydown="if(event.key==='Enter')this.blur()">
+          <button class="btn btn-secondary" onclick="openDlFolder()">📁 Aç</button>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">İndirildiğinde klasörü göster</div>
+          <div class="card-desc">İndirme tamamlandığında dosyanın bulunduğu klasör açılır</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="chk-dl-show" onchange="save('downloads_show_folder', this.checked?'1':'0')">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- BAŞLANGIÇ ───────────────────────────────────── -->
+  <section id="baslangic">
+    <div class="section-title">Başlangıç</div>
+    <div class="card">
+      <div class="card-full">
+        <div class="card-label" style="margin-bottom:12px">Trace başlatıldığında</div>
+        <div class="radio-group">
+          <label class="radio-opt selected" id="ro-newtab">
+            <input type="radio" name="startup" value="new_tab" checked onchange="selectStartup('new_tab')">
+            <div>
+              <div class="card-label">🆕 Yeni Sekme Aç</div>
+              <div class="card-desc">Her zaman temiz bir yeni sekmeden başla</div>
+            </div>
+          </label>
+          <label class="radio-opt" id="ro-restore">
+            <input type="radio" name="startup" value="restore" onchange="selectStartup('restore')">
+            <div>
+              <div class="card-label">🔄 Kaldığın Yerden Devam Et</div>
+              <div class="card-desc">Son oturumun sekmeleri geri yüklenir</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERİ YÖNETİMİ ───────────────────────────────── -->
+  <section id="veri">
+    <div class="section-title">Veri Yönetimi</div>
+    <div class="dz">
+      <div class="dz-head">⚠️ Veri Silme İşlemleri — Geri Alınamaz</div>
+      <div class="dz-row">
+        <div class="card-left">
+          <div class="card-label">Tarama Geçmişi</div>
+          <div class="card-desc">Ziyaret edilen tüm URL ve sayfa başlıkları</div>
+        </div>
+        <button class="btn btn-danger" onclick="clearData('history','Tarama geçmişi')">Geçmişi Sil</button>
+      </div>
+      <div class="dz-row">
+        <div class="card-left">
+          <div class="card-label">İndirme Geçmişi</div>
+          <div class="card-desc">Kayıt silindi, dosyalar silinmez</div>
+        </div>
+        <button class="btn btn-danger" onclick="clearData('downloads','İndirme geçmişi')">İndirmeleri Sil</button>
+      </div>
+      <div class="dz-row">
+        <div class="card-left">
+          <div class="card-label">Raporlar</div>
+          <div class="card-desc">Tüm AI raporları ve .md dosyaları kalıcı silinir</div>
+        </div>
+        <button class="btn btn-danger" onclick="clearData('reports','Tüm raporlar')">Raporları Sil</button>
+      </div>
+      <div class="dz-row">
+        <div class="card-left">
+          <div class="card-label">Kullanıcı Tercihleri</div>
+          <div class="card-desc">Tüm ayarlar fabrika varsayılanlarına döner</div>
+        </div>
+        <button class="btn btn-danger" onclick="clearData('settings','Kullanıcı tercihleri')">Tercihleri Sıfırla</button>
+      </div>
+      <div class="dz-row dz-all">
+        <div class="card-left">
+          <div class="card-label" style="color:var(--danger);font-weight:700">Tüm Verileri Sil</div>
+          <div class="card-desc">Geçmiş, indirmeler, raporlar ve ayarların tamamı silinir</div>
+        </div>
+        <button class="btn btn-danger" style="font-weight:700" onclick="clearData('all','TÜM veriler')">Hepsini Sil</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ŞIFRELER ────────────────────────────────────── -->
+  <section id="sifreler">
+    <div class="section-title">Şifreler <span class="mock-label">MOCK</span></div>
+    <div class="card">
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">Kayıtlı Şifreler</div>
+          <div class="card-desc">Bu özellik yakında etkinleştirilecek. Örnek veriler gösterilmektedir.</div>
+        </div>
+        <button class="btn btn-secondary" disabled>➕ Şifre Ekle</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>Site</th><th>Kullanıcı Adı</th><th>Şifre</th><th></th></tr>
+          </thead>
+          <tbody id="pw-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SİSTEM ──────────────────────────────────────── -->
+  <section id="sistem">
+    <div class="section-title">Sistem</div>
+    <div class="card">
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">Varsayılan Tarayıcı</div>
+          <div class="card-desc">Trace'i sisteminizin varsayılan tarayıcısı olarak ayarlayın</div>
+        </div>
+        <button class="btn btn-primary" onclick="setDefaultBrowser()">🌐 Varsayılan Yap</button>
+      </div>
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-label">Trace Hakkında</div>
+          <div class="card-desc">Trace Browser • Chromium/CEF4Delphi • Delphi 12 Athens • Build 2025</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+console.log('[Trace Settings] settings.html script yüklendi ve çalışıyor.');
+window.addEventListener('error', function(e) {
+  console.error('[Trace Settings] Yakalanmamış JS hatası:', e.message, 'satır', e.lineno);
+});
+
+// ── MOCK PASSWORDS ──────────────────────────────────────────────────────────
+const MOCK_PW = [
+  { site:'google.com',  user:'kullanici@gmail.com', pw:'G00gle#2024!' },
+  { site:'github.com',  user:'dev_yusha',           pw:'Gh1tHub$ecret' },
+  { site:'youtube.com', user:'kullanici@gmail.com', pw:'Y0uTube@Pass'  },
+];
+(function renderPw(){
+  const tb = document.getElementById('pw-tbody');
+  MOCK_PW.forEach((p,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>🔒 ${p.site}</td>
+      <td>${p.user}</td>
+      <td id="pw${i}">•••••••••••</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-secondary" style="padding:4px 9px;font-size:11px" onclick="togglePw(${i},'${p.pw.replace(/'/g,"\\'")}')">Göster</button>
+        <button class="btn btn-danger" style="padding:4px 9px;font-size:11px;margin-left:4px" disabled>Sil</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+})();
+function togglePw(i,pw){
+  const el=document.getElementById('pw'+i);
+  el.textContent=el.textContent==='•••••••••••'?pw:'•••••••••••';
+}
+
+// ── SAVE SETTING ────────────────────────────────────────────────────────────
+function save(key, value) {
+  console.log('[Trace Settings] save:', key, '=', value);
+  window.location.href = 'tracecmd://settings-set?k=' + encodeURIComponent(key) + '&v=' + encodeURIComponent(value);
+  showToast('✓ Kaydedildi');
+}
+
+// Tek bir alana güvenli şekilde değer ata; element yoksa sessizce yutmak
+// yerine konsola bas (loadSettings'in tamamının durmasına izin verme).
+function setField(id, value) {
+  const el = document.getElementById(id);
+  if (!el) { console.error('[Trace Settings] Element bulunamadı: #' + id); return; }
+  el.value = value;
+}
+function setChecked(id, value) {
+  const el = document.getElementById(id);
+  if (!el) { console.error('[Trace Settings] Element bulunamadı: #' + id); return; }
+  el.checked = value;
+}
+
+// ── LOAD SETTINGS (called by Delphi after page loads) ──────────────────────
+function loadSettings(s) {
+  console.log('[Trace Settings] loadSettings çağrıldı:', s);
+  try {
+    if (s.api_key !== undefined) setField('inp-apikey', s.api_key);
+    if (s.greeting_name !== undefined) {
+      setField('inp-name', s.greeting_name);
+      updateAvatar(s.greeting_name);
+    }
+    if (s.greeting_salutation !== undefined) setField('inp-sal', s.greeting_salutation);
+    if (s.language     !== undefined) setField('inp-lang', s.language);
+    if (s.downloads_path !== undefined) setField('inp-dl-path', s.downloads_path);
+    if (s.downloads_show_folder !== undefined)
+      setChecked('chk-dl-show', s.downloads_show_folder === '1');
+    if (s.startup_mode !== undefined) selectStartup(s.startup_mode, true);
+    if (s.theme        !== undefined) changeTheme(s.theme, true);
+    if (s.email_service  !== undefined) setField('inp-email-svc', s.email_service);
+    if (s.email_address  !== undefined) setField('inp-email-addr', s.email_address);
+    if (s.email_password !== undefined) setField('inp-email-pass', s.email_password);
+    if (s.email_imap !== undefined) setField('inp-email-imap', s.email_imap);
+    if (s.email_imap_status !== undefined)
+      setImapStatus(s.email_imap_status, s.email_imap_status_msg || '');
+    console.log('[Trace Settings] Tüm alanlar dolduruldu.');
+  } catch (err) {
+    console.error('[Trace Settings] loadSettings HATASI:', err);
+  }
+}
+
+// ── IMAP TEST ────────────────────────────────────────────────────────────────
+let _imapTestTimer = null;
+function testImapConnection() {
+  console.log('[Trace IMAP] Test Et butonuna tıklandı, saat:', new Date().toLocaleTimeString());
+  showToast('🔗 Bağlantı test ediliyor...');
+  setImapStatus('testing', 'Test ediliyor...');
+  const btn = document.getElementById('btnTestImap');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Test ediliyor...'; }
+
+  // Arka uçtan HİÇBİR yanıt gelmese bile (asılı kalma, çökme, eski build vb.)
+  // arayüz sonsuza dek "Test ediliyor" demesin diye 20 sn'lik bir emniyet var.
+  clearTimeout(_imapTestTimer);
+  _imapTestTimer = setTimeout(function () {
+    console.error('[Trace IMAP] 20 saniye içinde Delphi tarafından hiçbir yanıt gelmedi.');
+    setImapStatus('error', '20 sn yanıt yok — muhtemelen eski/derlenmemiş bir sürüm çalışıyor, uygulamayı kapatıp yeniden başlatın');
+  }, 20000);
+
+  // Aynı URL'ye art arda gidiş CEF tarafında navigasyon olarak sayılmayabiliyor,
+  // bu yüzden her tıklamada benzersiz bir sorgu parametresi ekliyoruz.
+  window.location.href = 'tracecmd://test-imap?t=' + Date.now();
+}
+
+function setImapStatus(state, msg) {
+  const dot = document.getElementById('imapStatusDot');
+  const txt = document.getElementById('imapStatusText');
+  if (!dot || !txt) return;
+  const colors = {
+    ok: 'var(--success)',
+    error: 'var(--danger)',
+    testing: 'var(--warn)',
+    unconfigured: 'var(--text2)',
+    untested: 'var(--text2)'
+  };
+  const labels = {
+    ok: '✓ Bağlı',
+    error: '✕ Hata',
+    testing: '… Test ediliyor',
+    unconfigured: 'Yapılandırılmadı',
+    untested: 'Test edilmedi'
+  };
+  dot.style.background = colors[state] || colors.untested;
+  txt.style.color = state === 'ok' ? 'var(--success)' : state === 'error' ? 'var(--danger)' : 'var(--text2)';
+  txt.textContent = (labels[state] || state) + (msg ? ' — ' + msg : '');
+
+  if (state !== 'testing') {
+    clearTimeout(_imapTestTimer);
+    const btn = document.getElementById('btnTestImap');
+    if (btn) { btn.disabled = false; btn.textContent = '🔗 Bağlantıyı Test Et'; }
+  }
+}
+
+// ── AVATAR ──────────────────────────────────────────────────────────────────
+function updateAvatar(name) {
+  const el = document.getElementById('avatarEl');
+  el.textContent = name && name.length > 0 ? name[0].toUpperCase() : '?';
+}
+
+// ── THEME ────────────────────────────────────────────────────────────────────
+function changeTheme(t, silent) {
+  document.getElementById('tc-dark').classList.toggle('active', t === 'dark');
+  document.getElementById('tc-light').classList.toggle('active', t === 'light');
+  if (t === 'light') document.body.classList.add('light');
+  else               document.body.classList.remove('light');
+  if (!silent) save('theme', t);
+}
+
+// ── API KEY ──────────────────────────────────────────────────────────────────
+function toggleKey() {
+  const inp = document.getElementById('inp-apikey');
+  const btn = document.getElementById('btnKey');
+  if (inp.type === 'password') { inp.type = 'text';     btn.textContent = 'Gizle'; }
+  else                         { inp.type = 'password'; btn.textContent = 'Göster'; }
+}
+function clearApiKey() {
+  document.getElementById('inp-apikey').value = '';
+  document.getElementById('inp-apikey').type  = 'password';
+  document.getElementById('btnKey').textContent = 'Göster';
+  save('api_key', '');
+}
+
+// ── DOWNLOADS ────────────────────────────────────────────────────────────────
+function openDlFolder() {
+  window.location.href = 'tracecmd://open-downloads-folder';
+}
+
+// ── STARTUP ──────────────────────────────────────────────────────────────────
+function selectStartup(val, silent) {
+  document.getElementById('ro-newtab').classList.toggle('selected',  val === 'new_tab');
+  document.getElementById('ro-restore').classList.toggle('selected', val === 'restore');
+  document.querySelector('input[value="' + val + '"]').checked = true;
+  if (!silent) save('startup_mode', val);
+}
+
+// ── DATA MANAGEMENT ──────────────────────────────────────────────────────────
+function clearData(type, label) {
+  if (!confirm('"' + label + '" kalıcı olarak silinecek.\n\nEmin misiniz?')) return;
+  window.location.href = 'tracecmd://settings-clear?type=' + type;
+}
+// Called by Delphi after clear completes
+function onDataCleared(type, success) {
+  if (success) {
+    showToast('✓ Silindi: ' + type);
+    if (type === 'settings' || type === 'all') {
+      // Reset form to defaults
+      loadSettings({theme:'dark',greeting_salutation:'Merhaba',greeting_name:'Yuşa',
+        language:'tr',downloads_show_folder:'1',startup_mode:'new_tab',api_key:''});
+    }
+  } else {
+    showToast('❌ Silme başarısız.');
+  }
+}
+
+// ── DEFAULT BROWSER ──────────────────────────────────────────────────────────
+function setDefaultBrowser() {
+  window.location.href = 'tracecmd://set-default-browser';
+  showToast('Windows Ayarları açılıyor...');
+}
+
+// ── OPEN URL ────────────────────────────────────────────────────────────────
+function openURL(url) {
+  window.location.href = 'tracecmd://open-url?url=' + encodeURIComponent(url);
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── SIDEBAR NAV ──────────────────────────────────────────────────────────────
+function scrollToSec(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+}
+function updateNav() {
+  const secs = ['profil','ai','gorunum','indirmeler','baslangic','veri','sifreler','sistem'];
+  const ct = document.getElementById('content');
+  let cur = secs[0];
+  for (const id of secs) {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop - 32 <= ct.scrollTop) cur = id;
+  }
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.sec === cur);
+  });
+}
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+function searchSections(q) {
+  const lq = q.toLowerCase();
+  document.querySelectorAll('section').forEach(s => {
+    s.style.display = (!lq || s.textContent.toLowerCase().includes(lq)) ? '' : 'none';
+  });
+}
+
+// ── DEFAULTS (before Delphi injection) ───────────────────────────────────────
+document.getElementById('chk-dl-show').checked = true;
+document.getElementById('ro-newtab').classList.add('selected');
+
+function toggleMailKey() {
+  const inp = document.getElementById('inp-email-pass');
+  const btn = document.getElementById('btnMailKey');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Gizle'; }
+  else { inp.type = 'password'; btn.textContent = 'Göster'; }
+}
+
+// Servis seçildiğinde IMAP portunu otomatik doldur
+function updateImapParams(svc) {
+  const imapInput = document.getElementById('inp-email-imap');
+  if (svc === 'gmail') { imapInput.value = 'imap.gmail.com:993'; save('email_imap', imapInput.value); }
+  else if (svc === 'outlook') { imapInput.value = 'outlook.office365.com:993'; save('email_imap', imapInput.value); }
+}
+</script>
+</body>
+</html>

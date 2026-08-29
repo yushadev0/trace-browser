@@ -76,6 +76,7 @@
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_UsePackage>vclwinx;DataSnapServer;fmx;TeePro929;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;DBXMSSQLDriver;FireDACCommonODBC;emsclient;appanalytics;IndyProtocols;vclx;Skia.Package.RTL;dbxcds;vcledge;FMXTeeDB929;DBXFirebirdDriver;dacvcl290;FireDACSqliteDriver;DbxClientDriver;soapmidas;dbexpress;vquery290;inet;vcltouch;Tee929;uniGUI29VCL;FireDACDBXDriver;TeeImage929;FMXTeeImport929;fmxdae;CustomIPTransport;FireDACMSSQLDriver;IndySystem;vclFireDAC;FMXTeeLanguage929;FireDACCommon;DataSnapServerMidas;FireDACODBCDriver;emsserverresource;bindcompdbx;dgit;rtl;FireDACMySQLDriver;TeeGL929;DBXSqliteDriver;DBXSybaseASEDriver;vclimg;DataSnapFireDAC;unidacfmx290;inetdbxpress;FireDAC;xmlrtl;TeeImport929;dsnap;FireDACDb2Driver;CPort_R;DBXOracleDriver;DBXInformixDriver;fmxobj;bindcompvclsmp;DataSnapNativeClient;TeeTree2D29Tee9;DatasnapConnectorsFreePascal;sgcWebSocketsD12;FMXTeePro929;FireDACCommonDriver;IndyIPClient;bindcompvclwinx;TeeDB929;bindcompfmx;uSynEdit_R2025;crcontrols290;inetdb;FireDACASADriver;vclactnband;fmxFireDAC;TeeWorld929;FireDACInfxDriver;DBXMySQLDriver;VclSmp;DataSnapCommon;fmxase;DBXOdbcDriver;FMXTee929;dbrtl;uniGUI29m;FireDACOracleDriver;Skia.Package.FMX;FireDACMSAccDriver;DataSnapIndy10ServerTransport;DataSnapConnectors;vcldsnap;DBXInterBaseDriver;FireDACMongoDBDriver;TeeUI929;FireDACTDataDriver;Skia.Package.VCL;vcldb;unidacvcl290;dacfmx290;bindcomp;inetstn;IndyCore;RESTBackendComponents;FMXTree29;TeeLanguage929;FireDACADSDriver;RESTComponents;IndyIPServer;vcl;dsnapxml;adortl;dsnapcon;DataSnapClient;DataSnapProviderClient;dac290;DBXDb2Driver;FmxTeeUI929;emsclientfiredac;FireDACPgDriver;FireDACDSDriver;tethering;bindcompvcl;CloudService;DBXSybaseASADriver;soaprtl;unidac290;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_UnitSearchPath>vendor\Indy10Patched;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -129,13 +130,14 @@
         </DCCReference>
         <DCCReference Include="uBrowserFrame.pas">
             <Form>TBrowserFrame</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="uData.pas">
             <Form>dmVeri</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="uBookmarkDialog.pas">
+            <Form>frmBookmarkEdit</Form>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

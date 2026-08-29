@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Trace - Görev Yöneticisi</title>
+    <style>
+        :root {
+            --bg:        #202124;
+            --header-bg: rgba(32, 33, 36, 0.95);
+            --border:    #3c4043;
+            --border2:   #303134;
+            --text:      #E8EAED;
+            --text2:     #9aa0a6;
+            --accent:    #8AB4F8;
+            --danger:    #F28B82;
+            --warn:      #F8CB8A;
+            --hover-bg:  #303134;
+            --kill-border: #5f6368;
+        }
+        body.trace-light {
+            --bg:        #F8F9FA;
+            --header-bg: rgba(248, 249, 250, 0.95);
+            --border:    #dadce0;
+            --border2:   #e8eaed;
+            --text:      #202124;
+            --text2:     #5f6368;
+            --accent:    #1a73e8;
+            --danger:    #d93025;
+            --warn:      #e37400;
+            --hover-bg:  #F1F3F4;
+            --kill-border: #dadce0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: var(--header-bg);
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Görev Tablosu Tasarımı */
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .task-table th {
+            color: var(--text2);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 73px; /* Header'ın hemen altında sabitlensin */
+            background-color: var(--bg);
+            z-index: 5;
+        }
+
+        .task-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border2);
+            font-size: 14px;
+            transition: background-color 0.15s;
+        }
+
+        .task-row {
+            cursor: default;
+        }
+
+        .task-row:hover td {
+            background-color: var(--hover-bg);
+        }
+
+        /* Görev Adı ve İkon */
+        .task-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        /* Metrik Renklendirmeleri */
+        .metric-normal { color: var(--text); }
+        .metric-warn { color: var(--warn); font-weight: 500; } /* Yüksek CPU/RAM için sarımsı uyarı */
+        .metric-danger { color: var(--danger); font-weight: 600; } /* Çok yüksek metrikler için kırmızı */
+
+        /* İşlemi Sonlandır Butonu */
+        .kill-btn {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--kill-border);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.15s;
+            opacity: 0; /* Sadece hoverda görünür yapıyoruz */
+        }
+
+        .task-row:hover .kill-btn {
+            opacity: 1;
+        }
+
+        .kill-btn:hover {
+            background-color: rgba(242, 139, 130, 0.1);
+            border-color: var(--danger);
+        }
+
+        /* Silinme Animasyonu */
+        @keyframes popOut {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(1.02); opacity: 1; background-color: #3c4043; }
+            100% { transform: scale(0.95); opacity: 0; }
+        }
+        .removing td {
+            animation: popOut 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Görev Yöneticisi
+        </h2>
+    </div>
+
+    <div class="container">
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th style="width: 45%;">Görev</th>
+                    <th style="width: 15%;">CPU</th>
+                    <th style="width: 15%;">Bellek</th>
+                    <th style="width: 15%;">Ağ</th>
+                    <th style="width: 10%;">İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="task-list">
+                <!-- MOCK DATA: Delphi burayı dinamik dolduracak -->
+
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Delphi tarafından LoadEnd'de (ve tema değiştiğinde canlı) çağrılır
+        function applyTheme(theme) {
+            document.body.classList.toggle('trace-light', theme === 'light');
+        }
+
+        // İŞLEMİ SONLANDIR (KİLL) SİNYALİ
+        function killProcess(btn, pid) {
+            const row = btn.closest('.task-row');
+            row.classList.add('removing');
+            
+            setTimeout(() => {
+                row.remove();
+                // Delphi tarafına "Bu PID'yi işletim sisteminden uçur!" komutunu yolluyoruz
+                window.location.href = "tracecmd://taskmgr-kill?pid=" + pid;
+            }, 300);
+        }
+
+        // DELPHI'DEN GELECEK CANLI VERİ GÜNCELLEME FONKSİYONU (Timer ile çağrılacak)
+        // Kullanımı: updateProcess(2048, "Sekme: YouTube", "14.2%", "420 MB", "2.1 MB/s", "danger", "normal");
+        function updateProcess(pid, title, cpu, ram, net, cpuClass, ramClass) {
+            let row = document.querySelector(`.task-row[data-pid="${pid}"]`);
+            
+            // Eğer PID tabloda yoksa, yeni satır oluştur
+            if (!row) {
+                const tbody = document.getElementById('task-list');
+                const html = `
+                <tr class="task-row" data-pid="${pid}">
+                    <td>
+                        <div class="task-name-cell">
+                            <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                            <span class="task-title-text">${title}</span>
+                        </div>
+                    </td>
+                    <td class="cpu-cell metric-${cpuClass}">${cpu}</td>
+                    <td class="ram-cell metric-${ramClass}">${ram}</td>
+                    <td class="net-cell metric-normal">${net}</td>
+                    <td><button class="kill-btn" onclick="killProcess(this, ${pid})">Sonlandır</button></td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', html);
+            } else {
+                // MEVCUT SATIR VARSA GÜNCELLE
+                
+                // 1. BAŞLIĞI GÜNCELLE (Eğer işlem "GPU" iken "Sekme" mesajı geldiyse anında değişsin!)
+                let titleSpan = row.querySelector('.task-title-text');
+                if (titleSpan && titleSpan.textContent !== title) {
+                    titleSpan.textContent = title;
+                }
+
+                // 2. CPU VE RAM METRİKLERİNİ GÜNCELLE
+                row.querySelector('.cpu-cell').textContent = cpu;
+                row.querySelector('.cpu-cell').className = `cpu-cell metric-${cpuClass}`;
+                
+                row.querySelector('.ram-cell').textContent = ram;
+                row.querySelector('.ram-cell').className = `ram-cell metric-${ramClass}`;
+                
+                row.querySelector('.net-cell').textContent = net;
+            }
+        }
+
+        function cleanupDeadProcesses(activePids) {
+            document.querySelectorAll('.task-row').forEach(row => {
+                const pid = parseInt(row.getAttribute('data-pid'));
+                
+                // Eğer bu satırdaki PID aktif listesinde yoksa ve zaten silinmiyorsa...
+                if (!activePids.includes(pid) && !row.classList.contains('removing')) {
+                    row.classList.add('removing'); // Animasyonu başlat
+                    setTimeout(() => row.remove(), 300); // Animasyon bitince DOM'dan uçur
+                }
+            });
+        }
+    </script>
+</body>
+</html>

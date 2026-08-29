@@ -1,0 +1,22 @@
+﻿# Delphi Files and Folders
+*.dcu
+*.identcache
+*.local
+*.stat
+*.res
+__history/
+__recovery/
+
+# Derlenmiş çalıştırılabilir + CEF/Chromium runtime dosyaları
+# (büyük ikili dosyalar; GitHub Release'lerinde dağıtılır, repoda tutulmaz)
+Win32/Debug/*.exe
+Win32/Debug/*.dll
+Win32/Debug/*.lib
+Win32/Debug/*.pak
+Win32/Debug/*.dat
+Win32/Debug/*.bin
+Win32/Debug/vk_swiftshader_icd.json
+Win32/Debug/locales/
+Win32/Debug/*.sqlite
+Win32/Debug/*.log
+

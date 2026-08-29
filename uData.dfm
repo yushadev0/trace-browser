@@ -36,4 +36,9 @@ object dmVeri: TdmVeri
     Left = 184
     Top = 192
   end
+  object qryYerIsaretleri: TFDQuery
+    Connection = FDConn
+    Left = 288
+    Top = 192
+  end
 end

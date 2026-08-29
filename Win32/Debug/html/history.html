@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Trace - Geçmiş</title>
+    <style>
+        body.trace-light { background-color: #F8F9FA; color: #202124; }
+        body.trace-light .header { background-color: rgba(248, 249, 250, 0.95); border-bottom-color: #dadce0; }
+        body.trace-light .search-box { background-color: #FFFFFF; border-color: #dadce0; color: #202124; }
+        body.trace-light .history-item:hover { background-color: #F1F3F4; }
+        body.trace-light .title { color: #202124; }
+        body.trace-light .remove-btn:hover { background-color: #dadce0; color: #202124; }
+        body {
+            background-color: #202124;
+            color: #E8EAED;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(32, 33, 36, 0.95);
+            padding: 20px 40px;
+            border-bottom: 1px solid #3c4043;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .search-box {
+            background-color: #303134;
+            border: 1px solid #5f6368;
+            border-radius: 20px;
+            padding: 8px 16px 8px 36px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 12px center;
+            color: white;
+            width: 300px;
+            outline: none;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        .search-box:focus { border-color: #8AB4F8; }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        .date-header { font-size: 14px; font-weight: 600; color: #9aa0a6; margin: 30px 0 10px 10px; }
+        .date-header:first-of-type { margin-top: 8px; }
+        
+        .btn {
+            background-color: transparent;
+            color: #8AB4F8;
+            border: 1px solid #5f6368;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .btn:hover { background-color: rgba(138, 180, 248, 0.1); border-color: #8AB4F8; }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .history-item:hover { background-color: #303134; }
+        .history-item:hover .remove-btn { visibility: visible; }
+
+        .favicon {
+            width: 16px; height: 16px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            background-color: #5f6368;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .favicon svg { width: 10px; height: 10px; color: #202124; }
+
+        .time { color: #9aa0a6; font-size: 13px; min-width: 50px; margin-left: 14px; flex-shrink: 0; }
+        .details { flex-grow: 1; margin-left: 15px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .title { font-size: 14px; color: #E8EAED; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .url { font-size: 12px; color: #9aa0a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .remove-btn {
+            visibility: hidden;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: #9aa0a6;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.1s, color 0.1s;
+        }
+        .remove-btn:hover { background-color: #3c4043; color: #E8EAED; }
+        .remove-btn svg { width: 14px; height: 14px; }
+
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            color: #9aa0a6;
+            font-size: 14px;
+        }
+        .empty-state.show { display: block; }
+        @keyframes popOut {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(1.02); opacity: 1; } /* Önce hafifçe şişer */
+            100% { transform: scale(0.9); opacity: 0; } /* Sonra sönerek kaybolur */
+        }
+        .removing {
+            animation: popOut 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            pointer-events: none; /* Silinirken tekrar tıklanmasını önler */
+        }
+    </style>
+</head>
+<body>
+   <div class="header">
+        <h2 style="margin: 0;">Geçmiş</h2>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" class="search-box" id="search" placeholder="Geçmişte ara...">
+            <button class="btn" style="color: #F28B82; border-color: #5f6368;" onclick="clearAll('history')">Tümünü Temizle</button>
+        </div>
+    </div>
+
+    <div class="container" id="history-container">
+        
+
+        <div class="empty-state" id="empty-state">Sonuç bulunamadı.</div>
+    </div>
+
+    <script>
+       function openHistoryItem(el) {
+            window.location.href = "tracecmd://open-url?url=" + encodeURIComponent(el.dataset.url);
+        }
+
+       function removeItem(e, btn) {
+            e.stopPropagation();
+            const item = btn.closest('.history-item');
+            const db_id = item.getAttribute('data-id'); // Gizli ID'yi alıyoruz
+            
+            item.classList.add('removing'); // Animasyonu tetikle
+            
+            // Animasyon bitince DOM'dan sil ve Delphi'ye emri fırlat!
+            setTimeout(() => {
+                item.remove();
+                checkEmpty();
+                window.location.href = "tracecmd://remove?type=history&id=" + db_id;
+            }, 250); 
+        }
+        
+        function checkEmpty() {
+            const visible = Array.from(document.querySelectorAll('.history-item'))
+                .filter(el => el.style.display !== 'none').length;
+            document.getElementById('empty-state').classList.toggle('show', visible === 0);
+        }
+
+        document.getElementById('search').addEventListener('input', function (e) {
+            const q = e.target.value.trim().toLowerCase();
+            document.querySelectorAll('.history-item').forEach(item => {
+                const match = item.dataset.title.toLowerCase().includes(q) ||
+                              item.dataset.url.toLowerCase().includes(q);
+                item.style.display = match ? '' : 'none';
+            });
+            checkEmpty();
+        });
+
+        function addHistoryCard(id, time, title, url) {
+            const html = `
+            <div class="history-item" data-id="${id}" data-title="${title}" data-url="${url}" onclick="openHistoryItem(this)">
+                <div class="favicon">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                </div>
+                <div class="time">${time}</div>
+                <div class="details">
+                    <div class="title">${title}</div>
+                    <div class="url">${url}</div>
+                </div>
+                <button class="remove-btn" title="Geçmişten kaldır" onclick="removeItem(event, this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                </button>
+            </div>`;
+            
+            // Kartı "Boş Durum" mesajının hemen ÜSTÜNE ekle
+            document.getElementById('empty-state').insertAdjacentHTML('beforebegin', html);
+            checkEmpty(); // Ekledikten sonra listeyi kontrol et (boş mesajını gizle)
+        }
+
+        function clearAll(type) {
+            if(confirm("Tüm kayıtları silmek istediğinize emin misiniz?")) {
+                // Delphi'ye "Bütün veritabanını uçur" komutu gönderiyoruz!
+                window.location.href = "tracecmd://clear-all?type=" + type;
+            }
+        }
+
+        function applyTheme(theme) {
+            document.body.classList.toggle('trace-light', theme === 'light');
+        }
+    </script>
+</body>
+</html>

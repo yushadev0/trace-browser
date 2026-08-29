@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Trace - İndirilenler</title>
+    <style>
+        body.trace-light { background-color: #F8F9FA; color: #202124; }
+        body.trace-light .header { background-color: rgba(248, 249, 250, 0.95); border-bottom-color: #dadce0; }
+        body.trace-light .download-card { background-color: #FFFFFF; border-color: #dadce0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        body.trace-light .file-icon { background-color: #F1F3F4; }
+        body.trace-light .file-name { color: #202124; }
+        body.trace-light .btn { border-color: #dadce0; }
+        body.trace-light .icon-btn:hover { background-color: #dadce0; color: #202124; }
+        body {
+            background-color: #202124;
+            color: #E8EAED;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #202124;
+            padding: 20px 40px;
+            border-bottom: 1px solid #3c4043;
+        }
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+
+        .download-card {
+            background-color: #292a2d;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #3c4043;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .file-icon {
+            width: 40px; height: 40px;
+            margin-right: 18px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background-color: #3c4043;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .file-icon svg { width: 20px; height: 20px; color: #9aa0a6; }
+
+        .file-info { flex-grow: 1; min-width: 0; }
+        .file-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-url { font-size: 12px; color: #9aa0a6; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-meta { font-size: 12px; color: #9aa0a6; }
+        .file-meta .status { color: #8AB4F8; }
+
+        /* Dosyası diskten silinmiş bir indirme: tüm kart soluklaşır,
+           dosya adının üzerine çizgi çekilir. Ayrıca yazıyla belirtmiyoruz,
+           görsel olarak yeterince belirgin olsun istiyoruz. */
+        .download-card.deleted { opacity: 0.5; }
+        .download-card.deleted .file-name { text-decoration: line-through; }
+        .download-card.deleted .progress-track { display: none; }
+
+        .progress-track {
+            margin-top: 8px;
+            height: 4px;
+            border-radius: 2px;
+            background-color: #3c4043;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            background-color: #8AB4F8;
+            transition: width 0.2s ease-out;
+        }
+
+        .actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 12px; }
+        .btn {
+            background-color: transparent;
+            color: #8AB4F8;
+            border: 1px solid #5f6368;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .btn:hover { background-color: rgba(138, 180, 248, 0.1); border-color: #8AB4F8; }
+
+        .icon-btn {
+            width: 32px; height: 32px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: #9aa0a6;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .icon-btn:hover { background-color: #3c4043; color: #E8EAED; }
+        .icon-btn svg { width: 16px; height: 16px; }
+
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            color: #9aa0a6;
+            font-size: 14px;
+        }
+        .empty-state.show { display: block; }
+        @keyframes popOut {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(1.02); opacity: 1; } /* Önce hafifçe şişer */
+            100% { transform: scale(0.9); opacity: 0; } /* Sonra sönerek kaybolur */
+        }
+        .removing {
+            animation: popOut 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            pointer-events: none; /* Silinirken tekrar tıklanmasını önler */
+        }
+    </style>
+</head>
+<body>
+    <div class="header" style="position: sticky; top: 0; background-color: rgba(32, 33, 36, 0.95); display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); z-index: 10;">
+        <h2 style="margin: 0;">İndirilenler</h2>
+        <button class="btn" style="color: #F28B82; border-color: #5f6368;" onclick="clearAll('downloads')">Tümünü Temizle</button>
+    </div>
+
+    <div class="container" id="downloads-container">
+
+
+        <div class="empty-state" id="empty-state">Henüz indirme yok.</div>
+    </div>
+
+    <script>
+        // İŞTE SİHİRLİ JAVASCRIPT FONKSİYONU
+        function klasordeGoster(db_id) {
+            // Sayfayı bizim uydurduğumuz özel bir URL'ye yönlendiriyoruz.
+            // Delphi tarafında bunu havada yakalayıp durduracağız!
+            window.location.href = "tracecmd://show-folder?id=" + db_id;
+        }
+
+        function copyLink(btn) {
+            const url = btn.closest('.download-card').querySelector('.file-url').textContent;
+            // navigator.clipboard.writeText sessizce başarısız oluyordu
+            // (CEF'in file:// bağlamında tarayıcı Clipboard API'si güvenilir
+            // değil); native Delphi panosunu kullanıyoruz.
+            window.location.href = "tracecmd://copy-to-clipboard?text=" + encodeURIComponent(url);
+
+            // Kopyalama Animasyonu: İkonu tik işaretine çevir ve hafifçe büyüt
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#8AB4F8" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>`;
+            btn.style.transform = "scale(1.15)";
+            
+            setTimeout(() => {
+                btn.style.transform = "scale(1)";
+                setTimeout(() => btn.innerHTML = originalHTML, 1500); // 1.5 saniye sonra eski haline dön
+            }, 150);
+        }
+
+       function removeCard(btn) {
+            const card = btn.closest('.download-card');
+            const db_id = card.getAttribute('data-id'); // Gizli ID'yi alıyoruz
+            
+            card.classList.add('removing'); // Animasyonu tetikle
+            
+            setTimeout(() => {
+                card.remove();
+                const remaining = document.querySelectorAll('.download-card:not(.removing)').length;
+                document.getElementById('empty-state').classList.toggle('show', remaining === 0);
+                // Delphi'ye emri fırlat!
+                window.location.href = "tracecmd://remove?type=downloads&id=" + db_id;
+            }, 250);
+        }
+
+        function addDownloadCard(id, fileName, fileUrl, metaText, progress, isDeleted, status) {
+            // progress: 0-100 arası ise devam eden indirme çubuğu çizilir,
+            // -1 ise (tamamlanmış/iptal/bilinmiyor) çubuk hiç eklenmez.
+            const progressHtml = (progress >= 0 && progress <= 100)
+                ? `<div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>`
+                : '';
+            const html = `
+            <div class="download-card${isDeleted ? ' deleted' : ''}" data-id="${id}" data-status="${status}">
+                <div class="file-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                </div>
+                <div class="file-info">
+                    <div class="file-name">${fileName}</div>
+                    <div class="file-url">${fileUrl}</div>
+                    <div class="file-meta">${metaText}</div>
+                    ${progressHtml}
+                </div>
+                <div class="actions">
+                    <button class="icon-btn" title="Bağlantıyı kopyala" onclick="copyLink(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    </button>
+                    <button class="btn" onclick="klasordeGoster(${id})">Klasörde Göster</button>
+                    <button class="icon-btn" title="Listeden kaldır" onclick="removeCard(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>`;
+
+            document.getElementById('empty-state').insertAdjacentHTML('beforebegin', html);
+
+            // Eğer boş mesajı görünüyorsa gizle
+            document.getElementById('empty-state').classList.remove('show');
+        }
+
+        // Delphi'nin tracecmd://check-deleted yanıtı ile çağrılır: dosyası
+        // artık diskte olmayan bir kartı görsel olarak soluklaştırır.
+        function markDeleted(id) {
+            const card = document.querySelector(`.download-card[data-id="${id}"]`);
+            if (card) card.classList.add('deleted');
+        }
+
+        // Tamamlanmış (henüz silindi işaretlenmemiş) indirmelerin dosyasının
+        // hâlâ diskte olup olmadığını periyodik olarak Delphi'ye sorar;
+        // böylece kullanıcı dosyayı sayfa açıkken silse bile sekmeyi
+        // yenilemeye gerek kalmadan "Silindi" görünümü anında yansır.
+        function checkDeletedStatus() {
+            const ids = Array.from(
+                document.querySelectorAll('.download-card[data-status="completed"]:not(.deleted)')
+            ).map(el => el.getAttribute('data-id'));
+            if (ids.length > 0)
+                window.location.href = "tracecmd://check-deleted?ids=" + ids.join(',');
+        }
+        setInterval(checkDeletedStatus, 3000);
+
+        function clearAll(type) {
+            if(confirm("Tüm kayıtları silmek istediğinize emin misiniz?")) {
+                // Delphi'ye "Bütün veritabanını uçur" komutu gönderiyoruz!
+                window.location.href = "tracecmd://clear-all?type=" + type;
+            }
+        }
+
+        function applyTheme(theme) {
+            document.body.classList.toggle('trace-light', theme === 'light');
+        }
+    </script>
+</body>
+</html>

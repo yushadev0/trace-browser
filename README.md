@@ -39,6 +39,63 @@ The goal is simple: build a browser around the way I actually use a browser.
 * Animated loading indicators.
 * Custom new-tab button.
 * Custom window interaction.
+* Custom title bar with quick-access Downloads and History buttons next to the system controls.
+
+### Bookmarks
+
+* Persistent bookmark bar backed by a local SQLite database.
+* Drag & drop reordering of bookmarks.
+* Automatic favicon fetching for each bookmark.
+* Icon-only bookmarks when no name is given, instead of wasting space on an empty label.
+* Click to open, star icon in the address bar to add/edit/remove the current page.
+
+### Downloads
+
+* Native Chromium download handling, saved to a custom, configurable download folder.
+* Custom downloads page (`trace://downloads`) instead of Chromium's built-in download UI.
+* Live progress bar for downloads in progress.
+* Automatic file renaming (`file (1).ext`, `file (2).ext`, ...) so a repeated download never silently overwrites the previous one.
+* Real-time detection of manually deleted files, with a faded / strikethrough visual state.
+* Copy source URL, show in folder, remove from list, or clear all.
+* A small flying animation from the click location to the Downloads icon when a download starts.
+
+### History
+
+* Custom history page (`trace://history`) instead of relying on Chromium's own UI.
+* Click any entry to reopen the page.
+* Search through visited pages.
+* Remove individual entries or clear all history.
+
+### Tasks & To-Do List
+
+* A lightweight task list built into the new tab page.
+* Add, complete, and delete tasks, backed by the local database.
+
+### AI Assistant
+
+* Built-in AI assistant (Gemini-powered) accessible from the new tab page.
+* Can answer questions, search the web, and help edit saved reports.
+* AI-generated email summaries with priority detection over an IMAP connection.
+* Responds in the user's selected interface language.
+
+### Settings
+
+* Custom settings page (`trace://settings`) instead of a native dialog.
+* Light / dark theme, applied instantly across all open tabs.
+* Interface language selection.
+* Custom greeting name and avatar on the new tab page.
+* Configurable download folder and "show in folder after download" behavior.
+* Startup mode: open a fresh new tab, or restore the previous session's tabs.
+* Email account configuration for the AI email summaries.
+
+### Task Manager
+
+* Built-in browser task manager (`trace://taskmgr`), similar in spirit to Chrome's own.
+* Per-tab CPU, RAM, and network usage.
+
+### Reports
+
+* Save and revisit AI-generated reports from a dedicated reports page.
 
 ### Lightweight Architecture
 
@@ -52,14 +109,17 @@ The goal is not to compete with Chromium on features, but to avoid carrying feat
 
 Trace is being developed with developer workflows in mind.
 
-Planned developer-focused functionality includes:
+Implemented so far:
 
-* Chromium DevTools.
-* Tab Manager.
-* Browser task/process management.
 * History.
 * Downloads.
 * Bookmarks.
+* Task Manager.
+* Settings.
+
+Still planned:
+
+* Chromium DevTools.
 * Additional browser utilities.
 
 ### Skia Rendering
@@ -91,6 +151,8 @@ This allows Trace to maintain a custom visual language while keeping the applica
 * Developer-oriented feature set
 * No unnecessary browser services
 * Custom tab management
+* Local-first bookmarks, history, downloads, and tasks
+* Built-in AI assistant
 * Designed with resource usage in mind
 
 Trace is not intended to replace Chrome for everyone.
@@ -106,6 +168,8 @@ It is a personal browser project built around a specific use case: having a fast
 * **CEF4Delphi**
 * **Chromium**
 * **Skia4Delphi**
+* **SQLite** (via FireDAC) for bookmarks, history, downloads, tasks, reports and settings
+* **Indy** (IMAP over SSL) for AI email summaries
 
 CEF4Delphi is used to embed Chromium into the Delphi application.
 
@@ -152,8 +216,13 @@ git clone https://github.com/yushadev0/trace-browser.git
 4. Open new tabs using the new-tab button.
 5. Drag tabs to reorder them.
 6. Close tabs using the tab close button.
+7. Star a page to bookmark it, and drag bookmarks to reorder them.
+8. Open Downloads or History from the title bar, or with the built-in shortcuts.
+9. Add quick tasks from the new tab page.
+10. Ask the built-in AI assistant a question from the new tab page.
+11. Adjust theme, language, and other preferences from Settings.
 
-Trace currently focuses on the core browsing experience. Additional browser functionality is being developed as the project evolves.
+Trace currently focuses on the core browsing experience, alongside the personal productivity features above. Additional browser functionality is being developed as the project evolves.
 
 ---
 
@@ -161,9 +230,9 @@ Trace currently focuses on the core browsing experience. Additional browser func
 
 ### Browser Features
 
-* [ ] History
-* [ ] Downloads
-* [ ] Bookmarks
+* [x] History
+* [x] Downloads
+* [x] Bookmarks
 * [ ] Chromium DevTools
 * [ ] Find in Page
 * [ ] Keyboard shortcuts
@@ -171,9 +240,9 @@ Trace currently focuses on the core browsing experience. Additional browser func
 
 ### Tab Management
 
-* [ ] Tab Manager
-* [ ] Browser task management
-* [ ] Tab memory/process monitoring
+* [x] Tab Manager
+* [x] Browser task management
+* [x] Tab memory/process monitoring
 * [ ] Tab suspension
 * [ ] Tab groups
 
@@ -183,6 +252,14 @@ Trace currently focuses on the core browsing experience. Additional browser func
 * [ ] Improved DevTools integration
 * [ ] Developer workspace features
 * [ ] Additional Chromium debugging utilities
+
+### AI & Productivity
+
+* [x] Built-in AI assistant
+* [x] AI email summaries
+* [x] Tasks / to-do list
+* [x] Saved reports
+* [ ] Full interface translation (i18n) beyond the AI assistant
 
 ### UI & Performance
 
