@@ -1,0 +1,26 @@
+{
+  "name": "Trace",
+  "year": 2026,
+  "stack": [
+    "Delphi 12",
+    "CEF4Delphi",
+    "Skia4Delphi",
+    "SQLite"
+  ],
+  "download": "https://github.com/yushadev0/trace-browser/releases/latest",
+  "tagline": {
+    "en": "A browser, written from scratch.",
+    "tr": "Sıfırdan yazılmış bir tarayıcı."
+  },
+  "body": {
+    "en": [
+      "A lightweight, developer-oriented browser I designed around my own way of working.",
+      "Chromium renders the pages. Almost everything else, from the tab bar and window controls to the internal pages, I wrote by hand in Delphi."
+    ],
+    "tr": [
+      "Kendi çalışma alışkanlıklarıma göre tasarladığım, hafif ve geliştirici odaklı bir tarayıcı.",
+      "Sayfaları Chromium çizer; sekme çubuğu, pencere kontrolleri ve iç sayfalar gibi geri kalan neredeyse her şeyi Delphi ile elle yazdım."
+    ]
+  },
+  "cover": "showcase-cover.webp"
+}
